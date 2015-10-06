@@ -17,7 +17,6 @@
 
 import sys
 import irc.parse as parser
-import bot
 #from usercontrol import *
 import decorators
 import config
