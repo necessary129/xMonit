@@ -201,7 +201,7 @@ def check(cli, rnick, chan, rest):
     snick = nick.replace(r"[",r"\[").replace(r"]",r"\]").replace("\\","\\\\").replace(r"{",r"\{").replace(r"}",r"\}")
     sident = user.replace(r"[",r"\[").replace(r"]",r"\]").replace("\\","\\\\").replace(r"{",r"\{").replace(r"}",r"\}")
     sip = cloak.replace(r"[",r"\[").replace(r"]",r"\]").replace("\\","\\\\").replace(r"{",r"\{").replace(r"}",r"\}")
-    p = Popen('cat raw.log | egrep \'snick|sident|sip\' | egrep \'!keep|!approve\'')
+    p = Popen('cat raw.log | egrep \'snick|sident|sip\' | egrep \'!keep|!approve\'',shell=True)
     t = p.communicate()
     if not t == "":
         ever = t.split('\n').split('\r')
