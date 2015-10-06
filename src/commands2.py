@@ -201,10 +201,10 @@ def check(cli, rnick, chan, rest):
     snick = nick.replace(r"[",r"\[").replace(r"]",r"\]").replace("\\","\\\\").replace(r"{",r"\{").replace(r"}",r"\}")
     sident = user.replace(r"[",r"\[").replace(r"]",r"\]").replace("\\","\\\\").replace(r"{",r"\{").replace(r"}",r"\}")
     sip = cloak.replace(r"[",r"\[").replace(r"]",r"\]").replace("\\","\\\\").replace(r"{",r"\{").replace(r"}",r"\}")
-    p = Popen('cat raw.log | egrep \'snick|sident|sip\' | egrep \'!keep|!approve\'',shell=True,stdout=PIPE,stderr=STDOUT)
+    p = Popen('cat raw.log | egrep \'{0}|{1}|{2}\' | egrep \'!keep|!approve\''.format(snick,sidnet,sip),shell=True,stdout=PIPE,stderr=STDOUT)
     t = p.communicate()
-    if not t == "":
-        ever = t
+    if not t[0] == "":
+        ever = t[0].split('\n')
         for x in ever:
             us = x.split()[-1]
             if  us!= rest:
