@@ -199,9 +199,9 @@ def rreload(module):
 def check(cli, rnick, chan, rest):
     """Gets help."""
     nick, mode, user, cloak = parser.parse_nick(rnick)
-    snick = nick.replace(r"[",r"\[").replace(r"]",r"\]").replace(r"\",r"\\").replace(r"{",r"\{").replace(r"}",r"\}")
-    sident = user.replace(r"[",r"\[").replace(r"]",r"\]").replace(r"\",r"\\").replace(r"{",r"\{").replace(r"}",r"\}")
-    sip = cloak.replace(r"[",r"\[").replace(r"]",r"\]").replace(r"\",r"\\").replace(r"{",r"\{").replace(r"}",r"\}")
+    snick = nick.replace(r"[",r"\[").replace(r"]",r"\]").replace("\\","\\\\").replace(r"{",r"\{").replace(r"}",r"\}")
+    sident = user.replace(r"[",r"\[").replace(r"]",r"\]").replace("\\","\\\\").replace(r"{",r"\{").replace(r"}",r"\}")
+    sip = cloak.replace(r"[",r"\[").replace(r"]",r"\]").replace("\\","\\\\").replace(r"{",r"\{").replace(r"}",r"\}")
     p = Popen('cat raw.log | egrep \'snick|sident|sip\' | egrep \'!keep|!approve\'')
     t = p.communicate()
     if not t == "":

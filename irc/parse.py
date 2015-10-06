@@ -18,7 +18,7 @@ import numerics
 import re
 numert = numerics.numerics
 import config
-addrchar= config.addrchar
+addrchar= config.ADDRCHAR
 def parse_privmsg(msg):
     try:
         splitt = msg.split('!') 
