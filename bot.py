@@ -32,8 +32,7 @@ from irc.client import bot
 
 import src
 import sys
-import src.handler as handler
-import src.atexits as atexits
+from src import handler, atexits
 py_version = sys.version_info
 major = int(py_version [0])
 minor = int(py_version [1])
