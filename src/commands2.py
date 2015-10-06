@@ -204,7 +204,7 @@ def check(cli, rnick, chan, rest):
     p = Popen('cat raw.log | egrep \'snick|sident|sip\' | egrep \'!keep|!approve\'',shell=True)
     t = p.communicate()
     if not t == "":
-        ever = t.split('\n').split('\r')
+        ever = t
         for x in ever:
             us = x.split()[-1]
             if  us!= rest:
