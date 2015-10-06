@@ -208,5 +208,5 @@ def check(cli, rnick, chan, rest):
         for x in ever:
             us = x.split()[-1]
             if  us!= rest:
-                cli.msg("noteness","{0} and {1} found to be used by the same person".format(us,rest))
+                cli.msg("##monitxshellz","{0} and {1} found to be used by the same person".format(us,rest))
     
