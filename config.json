@@ -1,0 +1,34 @@
+{
+    "USERNAME": "Slavetator", 
+    "ALLOWED_ALT_CHANNELS_COMMANDS": [], 
+    "configured": true, 
+    "CHANNELS": [
+        "#Slavetator-dev", 
+        "#Slavetator"
+    ], 
+    "USING_ZNC": true, 
+    "MAIN_CHAN": "#Slavetator", 
+    "PORT": 6697, 
+    "NICK": "Slavetator", 
+    "SUDOPASSWORD": "mysudopassword", 
+    "ADDRCHAR": "%", 
+    "DEBUG_CHANNEL": [
+        "#Slavetator-test"
+    ], 
+    "ADMIN_CLOAKS": [
+        "unaffiliated/nessessary129"
+    ], 
+    "SERVER_PASSWORD": "", 
+    "USE_SASL": true, 
+    "DEV_CHANNEL": "#Slavetator-dev", 
+    "SSHPORT": "22", 
+    "PASSWORD": "Slavetator1144", 
+    "USERHOME": "/home/", 
+    "HOSTNAME": "ssh.myshells.com", 
+    "SERVER": "irc.freenode.net", 
+    "SSL": true, 
+    "ADMIN_ACCOUNTS": [
+        "nessessary129"
+    ], 
+    "BUSERNAME": "bot"
+}
