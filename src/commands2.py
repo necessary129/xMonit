@@ -206,7 +206,9 @@ def check(cli, rnick, chan, rest):
     if not t[0] == "":
         ever = t[0].split('\n')
         for x in ever:
-            us = x.split()[-1]
-            if  us!= rest:
-                cli.msg("##monitxshellz","{0} and {1} found to be used by the same person".format(us,rest))
-    
+            try:
+                us = x.split()[-1]
+                if  us!= rest:
+                    cli.msg("##monitxshellz","{0} and {1} found to be used by the same person".format(us,rest))
+            except:
+                continue

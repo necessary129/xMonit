@@ -88,7 +88,7 @@ def on_privmsg(cli, rawnick, chan, msg, notice = False):
 				try:
 					fn.caller(cli, rawnick, chan, h.lstrip())
 				except Exception:
-					notify_error(cli,chan,log)
+					notify_error(cli,cli.devchan,log)
 
 def on_ctcp(cli,prefix,chan,ctcp):
 	ctcp = ctcp.lower()
