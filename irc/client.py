@@ -21,7 +21,7 @@ import ssl
 import sys
 import threading
 import time
-from mods.commands import commands
+
 import time
 import datetime
 import irc
@@ -29,7 +29,7 @@ import traceback
 from parse import *
 import os
 import base64
-import mods
+
 import src
 from src import logging
 rawlog = logging('raw.log').log

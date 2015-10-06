@@ -20,7 +20,6 @@ import irc.parse as parser
 import bot
 #from usercontrol import *
 import decorators
-import mods
 import config
 import re
 import time
