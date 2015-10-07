@@ -193,8 +193,8 @@ class bot(object):
     def send(self,*msg):
         with self.lock:
             msg = " ".join(msg)
-            if '#xshellz' in msg.lower() and 'privmsg' in msg.lower()
-            return
+            if '#xshellz' in msg.lower() and 'privmsg' in msg.lower():
+                return
             while not self.tokenbucket.consume(1):
                 time.sleep(0.3)
 
