@@ -150,9 +150,9 @@ def fjoin(cli,nick,chan,rest):
     if not src.args.debug:
         if isinstance(rest,list):
             for ech in rest:
-                config.CHANNELS.append(rest)
+                config.CHANNELS.add(rest)
         else:
-            config.CHANNELS.append(rest)
+            config.CHANNELS.add(rest)
     if chan == nick:
         cli.msg(nick,"The operation succeeded")
     else:
