@@ -197,11 +197,15 @@ def rreload(module):
 @cmd("keep","approve",raw_nick=True)
 def check(cli, rnick, chan, rest):
     """Gets help."""
-    nick, mode, user, cloak = parser.parse_nick(rnick)
-    snick = nick.replace(r"[",r"\[").replace(r"]",r"\]").replace("\\","\\\\").replace(r"{",r"\{").replace(r"}",r"\}")
-    sident = user.replace(r"[",r"\[").replace(r"]",r"\]").replace("\\","\\\\").replace(r"{",r"\{").replace(r"}",r"\}")
-    sip = cloak.replace(r"[",r"\[").replace(r"]",r"\]").replace("\\","\\\\").replace(r"{",r"\{").replace(r"}",r"\}")
-    p = Popen('cat raw.log | egrep \'{0}|{1}|{2}\' | egrep \'!keep|!approve\''.format(snick,sident,sip),shell=True,stdout=PIPE,stderr=STDOUT)
+    import re
+    nick, mode, user, ip = parser.parse_nick(rnick)
+    suip = re.search(r'(\d\.\d\.\d\.\d)')
+    if suip:
+        ip = suip.group(1)
+    snick = nick.replace(r"[",r"\[").replace(r"]",r"\]").replace("\\","\\\\").replace(r"{",r"\{").replace(r"}",r"\}").replace(r".",r"\.")
+    sident = user.replace(r"[",r"\[").replace(r"]",r"\]").replace("\\","\\\\").replace(r"{",r"\{").replace(r"}",r"\}").replace(r".",r"\.")
+    sip = ip.replace(r"[",r"\[").replace(r"]",r"\]").replace("\\","\\\\").replace(r"{",r"\{").replace(r"}",r"\}").replace(r".",r"\.")
+    p = Popen('cat raw.log | egrep \'{0}{1}{2}\' | egrep \'!keep|!approve\''.format(snick,"|"+sident if '~' not in ident else "","|"+sip if not ip == 'shell.xshellz.com'),shell=True,stdout=PIPE,stderr=STDOUT)
     t = p.communicate()
     if not t[0] == "":
         ever = t[0].split('\n')

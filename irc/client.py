@@ -193,7 +193,7 @@ class bot(object):
     def send(self,*msg):
         with self.lock:
             msg = " ".join(msg)
-            if '#xshellz' in msg.lower() and 'privmsg' in msg.lower():
+            if '#xshellz' in msg.lower() and ('privmsg' in msg.lower() or 'notice' in msg.lower()):
                 return
             while not self.tokenbucket.consume(1):
                 time.sleep(0.3)
@@ -253,8 +253,6 @@ class bot(object):
                                 self.handler(u"<--- receive {0} {1} ({2})".format(prefix, command, ", ".join(fargs)), level="debug")
                                 # for i,arg in enumerate(largs):
                                     # if arg is not None: largs[i] = arg.decode(enc)
-                                if command == 'privmsg' and fargs[0] == '#xshellz':
-                                    continue
                                 if command in self.command_handler:
                                     self.command_handler[command](self, prefix,*fargs)
                                 elif "" in self.command_handler:

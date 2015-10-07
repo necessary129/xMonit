@@ -90,10 +90,6 @@ class cmd:
 
 
         if self.admin_only:
-            if chan == nick:
-                cli.msg(nick, "You are not an admin.")
-            else:
-                cli.notice(nick, "You are not an admin.")
             return
 
         return self.func(*largs)
