@@ -35,8 +35,8 @@
 			"file": "src/commands2.py",
 			"settings":
 			{
-				"buffer_size": 7233,
-				"line_ending": "Unix"
+				"buffer_size": 8085,
+				"line_ending": "Windows"
 			}
 		},
 		{
@@ -52,8 +52,40 @@
 			"file": "irc/client.py",
 			"settings":
 			{
-				"buffer_size": 11436,
+				"buffer_size": 11391,
 				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "irc/parse.py",
+			"settings":
+			{
+				"buffer_size": 4872,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "bot.py",
+			"settings":
+			{
+				"buffer_size": 2663,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/handler.py",
+			"settings":
+			{
+				"buffer_size": 5701,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/Users/Shamil/Downloads/QuasiSpace.htm",
+			"settings":
+			{
+				"buffer_size": 28823,
+				"line_ending": "Unix"
 			}
 		}
 	],
@@ -168,6 +200,8 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"<a .*>.*</a>",
+			"<link .*>",
 			"STATUS",
 			"STATUSMSG_PREFIXES",
 			"help",
@@ -212,9 +246,10 @@
 		"highlight": true,
 		"in_selection": false,
 		"preserve_case": false,
-		"regex": false,
+		"regex": true,
 		"replace_history":
 		[
+			"",
 			"accon"
 		],
 		"reverse": false,
@@ -226,7 +261,7 @@
 	"groups":
 	[
 		{
-			"selected": 2,
+			"selected": 6,
 			"sheets":
 			[
 				{
@@ -234,15 +269,15 @@
 					"file": "src/commands2.py",
 					"settings":
 					{
-						"buffer_size": 7233,
+						"buffer_size": 8085,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1247,
-								1247
+								8085,
+								8085
 							]
 						],
 						"settings":
@@ -252,7 +287,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 540.0,
+						"translation.y": 2562.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -269,8 +304,8 @@
 						"selection":
 						[
 							[
-								549,
-								549
+								398,
+								398
 							]
 						],
 						"settings":
@@ -291,15 +326,15 @@
 					"file": "irc/client.py",
 					"settings":
 					{
-						"buffer_size": 11436,
+						"buffer_size": 11391,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								8954,
-								8954
+								1342,
+								1342
 							]
 						],
 						"settings":
@@ -309,7 +344,117 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 3024.0,
+						"translation.y": 126.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "irc/parse.py",
+					"settings":
+					{
+						"buffer_size": 4872,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1166,
+								1166
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "bot.py",
+					"settings":
+					{
+						"buffer_size": 2663,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1496,
+								1496
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 3,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 462.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "src/handler.py",
+					"settings":
+					{
+						"buffer_size": 5701,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2939,
+								2939
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1008.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "/C/Users/Shamil/Downloads/QuasiSpace.htm",
+					"settings":
+					{
+						"buffer_size": 28823,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2289,
+								2289
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/HTML/HTML.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -354,7 +499,7 @@
 	},
 	"replace":
 	{
-		"height": 0.0
+		"height": 62.0
 	},
 	"save_all_on_build": true,
 	"select_file":
