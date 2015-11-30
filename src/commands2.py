@@ -194,17 +194,18 @@ def rreload(module):
         attribute = getattr(module, attribute_name)
         if type(attribute) is ModuleType:
             rreload(attribute)
+
 @cmd("keep","approve",raw_nick=True)
 def check(cli, rnick, chan, rest):
     """Gets help."""
     import re
     nick, mode, user, ip = parser.parse_nick(rnick)
-    suip = re.search(r'(\d\.\d\.\d\.\d)')
+    suip = re.findall(r'([0-9.]+){4}/[0-9]*|([0-9A-Fa-f:]+)+/[0-9]*',ip)
     if suip:
-        ip = suip.group(1)
-    snick = nick.replace(r"[",r"\[").replace(r"]",r"\]").replace("\\","\\\\").replace(r"{",r"\{").replace(r"}",r"\}").replace(r".",r"\.")
-    sident = user.replace(r"[",r"\[").replace(r"]",r"\]").replace("\\","\\\\").replace(r"{",r"\{").replace(r"}",r"\}").replace(r".",r"\.")
-    sip = ip.replace(r"[",r"\[").replace(r"]",r"\]").replace("\\","\\\\").replace(r"{",r"\{").replace(r"}",r"\}").replace(r".",r"\.")
+        ip = suip[0]
+    sident = re.escape(user)
+    sip = re.escape(ip)
+    snick = re.escape(nick)
     p = Popen('cat raw.log | egrep \'{0}{1}{2}\' | egrep \'!keep|!approve\''.format(snick,"|"+sident if '~' not in ident else "","|"+sip if not ip == 'shell.xshellz.com'),shell=True,stdout=PIPE,stderr=STDOUT)
     t = p.communicate()
     if not t[0] == "":
@@ -216,3 +217,46 @@ def check(cli, rnick, chan, rest):
                     cli.msg("##monitxshellz","{0} and {1} found to be used by the same person".format(us,rest))
             except:
                 continue
+@hook('join',hookid=1234)
+def at_join(cli,prefix,channel,*etc):
+    cli.mode(channel)
+    hook.unhook(1234)
+voiced = set()
+@hook('namreply')
+def at_names(cli,prefix,_,__,channel,ppl):
+    global voiced
+    if channel != '#Slavetator-test':
+        return
+    everyone = ppl.split()
+    for each in everyone:
+        each = each.strip('@')
+        if each.startswith('+'):
+            voiced.append(each.strip('+'))
+aa = {}
+@hook('mode')
+def at_mode(cli,prefix,channel,mode,*ppl):
+    if channel != '#Slavetator-test':
+        return
+    lppl = list(ppl)
+    pre = ''
+    global aa
+    num = 0
+    for x in mode:
+        if x == '+':
+            pre = '+'
+            continue
+        elif x == '-':
+            pre = '-'
+            continue
+        else:
+            aa[lppl[num]] = pre+x
+            if pre+x =='+v':
+                voiced.add(lppl[num])
+            if pre+x == '-v':
+                voiced.remove(lppl[num])
+            if pre+x == '-m':
+                voiced = set()
+        num += 1
+    num = 0
+    print aa
+

@@ -72,5 +72,5 @@ def main():
 if __name__ == '__main__':
    atexit.register(atexits.atexit)
    atexit.register(atexits.saveconf)
-   atexit.register(atexits.saveappr)
+   """atexit.register(atexits.saveappr)"""
    main()

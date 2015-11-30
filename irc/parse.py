@@ -18,6 +18,7 @@ import numerics
 import re
 numert = numerics.numerics
 import config
+"""
 addrchar= config.ADDRCHAR
 def parse_privmsg(msg):
     try:
@@ -67,7 +68,7 @@ def parse_numeric(msg):
     splitted=msg.split(' ')
     number=splitted [1]
     return numert[number] 
-
+"""
 def parse_nick(name):
     """ parse a nickname and return a tuple of (nick, mode, user, host)
 

@@ -35,10 +35,11 @@ def saveconf():
     cnfg = open('config.json','w')
     json.dump(dc,cnfg,indent=4)
     cnfg.close()
+"""
 def saveappr():
     import json
     import appr
     dc['approved'] = appr.approved
     cnfg = open('approved.json','w')
     json.dump(dc,cnfg,indent=4)
-    cnfg.close()
+    cnfg.close()"""

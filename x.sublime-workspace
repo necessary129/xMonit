@@ -1,0 +1,545 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"tra",
+				"traceback_exception_yy"
+			],
+			[
+				"if",
+				"ifmain	if __name__ == '__main__'"
+			],
+			[
+				"pass",
+				"password"
+			],
+			[
+				"admin",
+				"admin_nicks"
+			],
+			[
+				"spli",
+				"splitted"
+			],
+			[
+				"numer",
+				"numerics"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"contents": "# Copyright (c) 2015 noteness\n# Permission is hereby granted, free of charge, to any person obtaining a copy\n# of this software and associated documentation files (the \"Software\"), to deal\n# in the Software without restriction, including without limitation the rights\n# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n# copies of the Software, and to permit persons to whom the Software is\n# furnished to do so, subject to the following conditions:\n# The above copyright notice and this permission notice shall be included in\n#  all copies or substantial portions of the Software.\n# THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\n# THE SOFTWARE.\n\nimport sys\nimport irc.parse as parser\n#from usercontrol import *\nimport decorators\nimport config\nimport re\nimport time\nimport settings as var\nimport src\nfrom subprocess import Popen, PIPE,STDOUT\nCOMMANDS = decorators.COMMANDS\nctcp = decorators.ctcps\nhook = decorators.hook\ncmd= decorators.cmd\ndef break_long_message(phrases, joinstr = \" \"):\n    message = []\n    count = 0\n    for phrase in phrases:\n        # IRC max is 512, but freenode splits around 380ish, make 300 to have plenty of wiggle room\n        if count + len(joinstr) + len(phrase) > 300:\n            message.append(\"\\n\" + phrase)\n            count = len(phrase)\n        else:\n            if message:\n                count = len(phrase)\n            else:\n                count += len(joinstr) + len(phrase)\n            message.append(phrase)\n    return joinstr.join(message)\n\nCMD_CHAR = config.ADDRCHAR\n\n@cmd(\"opme\",\"opame\", admin_only=True,pm=False)\ndef opme(cli, nick, chan, rest):\n    \"\"\"Ops You\"\"\"\n    cli.mode(chan,\"+o\",nick)\n    cli.cs(\"OP\",chan,nick)\n    return\n@cmd(\"op\", admin_only=True,pm=False)\ndef op(cli, nick, chan, rest):\n    \"\"\"Ops the nick specified or ops the bot if none\"\"\"\n    if rest:\n        cli.mode(chan,\"+o\",rest)\n        cli.cs(\"OP\",chan,rest)\n    else:\n        cli.cs(\"OP\",chan,cli.botnick)\n\n@cmd(\"topic\", admin_only=True,pm=False)\ndef topic(cli, nick, chan, rest):\n    \"\"\"Changes the topic of the channel\"\"\"\n    cli.topic(chan,':'+rest)\n@cmd(\"restart\", admin_only=True,pm=True)\ndef restart(cli, nick, chan, rest):\n    \"\"\"Restarts the bot\"\"\"\n    cli.restart(msg=\"Forced restart by {0}\".format(nick))\n@cmd(\"exec\", admin_only=True,pm=True)\ndef exe(cli, nick, chan, rest):\n    \"\"\"Executes the given code\"\"\"\n    exec(rest)\n@cmd(\"eval\", admin_only=True,pm=True)\ndef ev(cli, nick, chan, rest):\n    \"\"\"Evaluates the code and give you the results\"\"\"\n    evaluated = eval(rest)\n    if chan == nick:\n        cli.msg(nick,evaluated)\n    else:\n        cli.notice(nick,evaluated)\n@cmd(\"quit\",\"bye\", admin_only=True,pm=True)\ndef restart(cli, nick, chan, rest):\n    \"\"\"Makes the bot quit IRC\"\"\"\n    cli.quit(msg=\"Forced quit by {0}\".format(nick))\n@cmd(\"send\", admin_only=True,pm=True)\ndef send(cli, nick, chan, rest):\n    \"\"\"Sends Raw IRC lines\"\"\"\n    cli.send(rest)\n@cmd(\"reload\", admin_only=True,pm=True)\ndef send(cli, nick, chan, rest):\n    \"\"\"Reloads the commands module\"\"\"\n    rreload(bot)\n    if chan == nick:\n        cli.msg(nick,\"The operation succeeded\")\n    else:\n        cli.notice(nick,\"The operation succeeded\")\n@cmd(\"version\",\"info\",pm=True)\ndef bt_info(cli, nick, chan, rest):\n    \"\"\"Shows information about the bot\"\"\"\n    cli.msg(chan,\"{0}: I am a basic server handling bot running purely on Python. \\nYou can visit my website - http://slavetator.github.io/ :)\\nSee any bugs? report it by {1}bug <description>\".format(nick,CMD_CHAR))\n@cmd(\"bug\",pm=True)\ndef bt_info(cli, nick, chan, rest):\n    \"\"\"Report bugs\"\"\"\n    import datetime\n    timed = \"[{0}]\".format(datetime.datetime.now())\n    with open('logs/bugs.txt','a') as bugf:\n        bugf.write(\"{0} BUG: Reported by: {1} Description: {2}\\r\\n\".format(timed,nick,rest))\n    cli.msg('noteness','\\x02!att-slavetator-bug\\x02 Reported by: \\x02{0}\\x02 Description: \\x02{1}\\x02'.format(nick,rest))\n    if chan == nick:\n        cli.msg(nick,\"The operation succeeded\\nThank you for your contribution :)\")\n    else:\n        cli.notice(nick,\"The operation succeeded\\nThank you for your contribution :)\")\n@ctcp('version')\ndef ctcp_ver(cli,chan,nick):\n    cli.ctcpreply(nick,'VERSION',\"Slavetator - http://slavetator.github.io/\")\n@ctcp('time')\ndef ctcp_ver(cli,chan,nick):\n    cli.ctcpreply(nick,'TIME',\"It's Tea O'Clock\")\n\ncycle = 0\n@hook(\"ping\")\ndef on_ping(cli, prefix, server):\n    cli.send('PONG', server)\n@hook(\"nicknameinuse\")\ndef nickinuse(cli, *blah):\n    cli.botnick += \"_\"\n    cli.nick(cli.botnick)\n@hook(\"pong\")\ndef on_pong(cli, prefix, server,timet):\n    global cycle\n    if timet.isdigit():\n        lag = int(time.time()) - int(timet)\n        if lag > 3:\n            cycle +=1\n            cli.msg(cli.main_chan,\"\\x02Warning:\\x02 I am lagging by \\x02{0}\\x02 seconds.\\nThis marks heavy lag cycle \\x02{1}.\\x02 Automatic restart will initiate at \\x023\\x02 lag cycles\".format(lag,cycle))\n        else:\n            cycle = 0\n        if cycle > 2:\n            cli.restart(msg=\"Restarting due to heavy lag cycles\")\n@cmd(\"join\",admin_only=True,pm=True)\ndef fjoin(cli,nick,chan,rest):\n    \"\"\"Makes the bot join a channel\"\"\"\n    cli.join(rest)\n    if \",\" in rest:\n        rest = rest.split(',')\n    if not src.args.debug:\n        if isinstance(rest,list):\n            for ech in rest:\n                config.CHANNELS.add(rest)\n        else:\n            config.CHANNELS.add(rest)\n    if chan == nick:\n        cli.msg(nick,\"The operation succeeded\")\n    else:\n        cli.notice(nick,\"The operation succeeded\")\n@cmd(\"part\",\"leave\",admin_only=True,pm=True)\ndef fjoin(cli,nick,chan,rest):\n    \"\"\"Makes the bot part a channel\"\"\"\n    cli.part(rest)\n    if \",\" in rest:\n        rest = rest.split(',')\n    if not src.args.debug:\n        if isinstance(rest,list):\n            for ech in rest:\n                if rest in config.CHANNELS:\n                    config.CHANNELS.remove(rest)\n        else:\n            if rest in config.CHANNELS:\n                config.CHANNELS.remove(rest)\n    if chan == nick:\n        cli.msg(nick,\"The operation succeeded\")\n    else:\n        cli.notice(nick,\"The operation succeeded\")\n@cmd(\"flush\",\"savecfg\",admin_only=True,pm=True)\ndef flush(cli,nick,chan,rest):\n    \"\"\"Write the config to disk\"\"\"\n    from src import atexits\n    atexits.saveconf()\n    if chan == nick:\n        cli.msg(nick,\"The operation succeeded\")\n    else:\n        cli.notice(nick,\"The operation succeeded\")\n\n\ndef rreload(module):\n    \"\"\"Recursively reload modules.\"\"\"\n    from types import ModuleType\n    reload(module)\n    for attribute_name in dir(module):\n        attribute = getattr(module, attribute_name)\n        if type(attribute) is ModuleType:\n            rreload(attribute)\n\"\"\"\n@cmd(\"keep\",\"approve\",raw_nick=True)\ndef check(cli, rnick, chan, rest):\n    \\\"\\\"\\\"Gets help.\\\"\\\"\\\"\n    import re\n    nick, mode, user, ip = parser.parse_nick(rnick)\n    suip = re.search(r'(\\d\\.\\d\\.\\d\\.\\d)')\n    if suip:\n        ip = suip.group(1)\n    snick = nick.replace(r\"[\",r\"\\[\").replace(r\"]\",r\"\\]\").replace(\"\\\\\",\"\\\\\\\\\").replace(r\"{\",r\"\\{\").replace(r\"}\",r\"\\}\").replace(r\".\",r\"\\.\")\n    sident = user.replace(r\"[\",r\"\\[\").replace(r\"]\",r\"\\]\").replace(\"\\\\\",\"\\\\\\\\\").replace(r\"{\",r\"\\{\").replace(r\"}\",r\"\\}\").replace(r\".\",r\"\\.\")\n    sip = ip.replace(r\"[\",r\"\\[\").replace(r\"]\",r\"\\]\").replace(\"\\\\\",\"\\\\\\\\\").replace(r\"{\",r\"\\{\").replace(r\"}\",r\"\\}\").replace(r\".\",r\"\\.\")\n    p = Popen('cat raw.log | egrep \\'{0}{1}{2}\\' | egrep \\'!keep|!approve\\''.format(snick,\"|\"+sident if '~' not in ident else \"\",\"|\"+sip if not ip == 'shell.xshellz.com'),shell=True,stdout=PIPE,stderr=STDOUT)\n    t = p.communicate()\n    if not t[0] == \"\":\n        ever = t[0].split('\\n')\n        for x in ever:\n            try:\n                us = x.split()[-1]\n                if  us!= rest:\n                    cli.msg(\"##monitxshellz\",\"{0} and {1} found to be used by the same person\".format(us,rest))\n            except:\n                continue\"\"\"\n@hook('join',hookid=1234)\ndef at_join(cli,prefix,channel,*etc):\n    cli.mode(channel)\n    hook.unhook(1234)\nvoiced = set()\n@hook('namreply')\ndef at_names(cli,prefix,_,__,channel,ppl):\n    global voiced\n    if channel != '#Slavetator-test':\n        return\n    everyone = ppl.split()\n    for each in everyone:\n        each = each.strip('@')\n        if each.startswith('+'):\n            voiced.append(each.strip('+'))\naa = {}\n@hook('mode')\ndef at_mode(cli,prefix,channel,mode,*ppl):\n    if channel != '#Slavetator-test':\n        return\n    lppl = list(ppl)\n    pre = ''\n    global aa\n    global voiced\n    num = 0\n    for x in mode:\n        if x == '+':\n            pre = '+'\n            continue\n        elif x == '-':\n            pre = '-'\n            continue\n        else:\n            aa[lppl[num]] = pre+x\n            if pre+x =='+v':\n                voiced.add(lppl[num])\n            if pre+x == '-v':\n                voiced.remove(lppl[num])\n            if pre+x == '-m':\n                voiced = set()\n                \n        num += 1\n    num = 0\n    print aa\n\n",
+			"file": "src/commands2.py",
+			"file_size": 9604,
+			"file_write_time": 130902438478530482,
+			"settings":
+			{
+				"buffer_size": 9377,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/Users/Shamil/Documents/GitHub/lykos/src/wolfgame.py",
+			"settings":
+			{
+				"buffer_size": 402532,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "config.py",
+			"settings":
+			{
+				"buffer_size": 1283,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "irc/parse.py",
+			"settings":
+			{
+				"buffer_size": 4879,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "config.json",
+			"settings":
+			{
+				"buffer_size": 809,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "src/atexits.py",
+			"settings":
+			{
+				"buffer_size": 1749,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "bot.py",
+			"settings":
+			{
+				"buffer_size": 2706,
+				"line_ending": "Windows"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 360.0,
+		"selected_items":
+		[
+			[
+				"Snippet: ",
+				"Snippet: __magic__"
+			],
+			[
+				"",
+				"Indentation: Reindent Lines"
+			]
+		],
+		"width": 364.0
+	},
+	"console":
+	{
+		"height": 125.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/C/Users/Shamil/Documents/GitHub/Slavetator/mods/commands.py",
+		"/C/Users/Shamil/AppData/Roaming/HexChat/addons/buffextras.py",
+		"/C/Users/Shamil/AppData/Roaming/HexChat/ggd.txt",
+		"/C/Users/Shamil/Documents/GitHub/Slavetator/bot.py",
+		"/C/Users/Shamil/Documents/GitHub/Slavetator/config.py",
+		"/C/Users/Shamil/Documents/GitHub/xshellz monitor/src/decorators.py",
+		"/C/Users/Shamil/Documents/GitHub/xshellz monitor/src/atexits.py",
+		"/C/Users/Shamil/Documents/GitHub/xshellz monitor/src/appr.py",
+		"/C/Users/Shamil/Documents/GitHub/xshellz monitor/config.json",
+		"/C/Users/Shamil/Documents/GitHub/xshellz monitor/src/handler.py",
+		"/C/Users/Shamil/Documents/GitHub/xshellz monitor/bot.py",
+		"/C/Users/Shamil/Documents/GitHub/xshellz monitor/irc/parse.py",
+		"/C/Users/Shamil/Documents/GitHub/xshellz monitor/irc/client.py",
+		"/C/Users/Shamil/Documents/GitHub/xshellz monitor/src/settings.py",
+		"/C/Users/Shamil/Documents/GitHub/xshellz monitor/src/commands2.py",
+		"/C/Users/Shamil/Downloads/QuasiSpace.htm",
+		"/C/Program Files/HexChat/plugins/hcsysinfo.dll",
+		"/D/idle.py",
+		"/D/Download/znc-1.6.0/znc-1.6.0/include/znc/Nick.h",
+		"/D/freenode/#openshells.log",
+		"/D/freenode/#ashellz.log",
+		"/C/Users/Shamil/Documents/GitHub/lykos/src/wolfgame.py",
+		"/D/pf/aa.py",
+		"/C/Users/Shamil/Documents/GitHub/Slavetator/irc/client.py",
+		"/D/cgi/cgi-bin/add.py",
+		"/D/cgi/style.css",
+		"/D/cgi/example.db",
+		"/D/ashellz/httpd.py",
+		"/C/Python27/Lib/logging/__init__.py",
+		"/C/Python25/Tools/Scripts/cleanfuture.py",
+		"/C/Python25/Tools/Scripts/mailerdaemon.py",
+		"/C/Python25/Tools/Scripts/reindent.py",
+		"/D/Python_apps/Code/code.py",
+		"/C/Python27/Tools/Scripts/2to3.py",
+		"/C/Python27/Tools/Scripts/setup.py",
+		"/C/Python27/Tools/Scripts/google.py",
+		"/D/Python_apps/PyDict/pydict.py",
+		"/C/Python27/Lib/test/test_sys.py",
+		"/C/Python27/include/sysmodule.h",
+		"/C/Python27/Lib/sysconfig.py",
+		"/C/Users/Shamil/Documents/GitHub/fffgg/mods/commands.py",
+		"/C/Users/Shamil/Documents/GitHub/fffgg/config.py",
+		"/C/Users/Shamil/Documents/GitHub/lykos/src/handler.py",
+		"/C/Users/Shamil/Documents/GitHub/fffgg/irc/client.py",
+		"/C/Users/Shamil/Documents/GitHub/fffgg/Slavetator.sublime-project",
+		"/C/Users/Shamil/Documents/GitHub/fffgg/bot.py",
+		"/C/Users/Shamil/AppData/Roaming/Sublime Text 2/Packages/User/Preferences.sublime-settings",
+		"/C/Python27/pythonw.exe",
+		"/C/Users/Shamil/Documents/GitHub/bot.py",
+		"/C/Users/Shamil/Downloads/Compressed/lykos-master/lykos-master/src/handler.py",
+		"/C/Users/Shamil/AppData/Roaming/Sublime Text 2/Packages/Python/if-__name__-==-'__main__'.sublime-snippet",
+		"/C/Users/Shamil/Documents/GitHub/lykos/oyoyo/client.py",
+		"/C/Users/Shamil/Documents/GitHub/lykos/wolfbot.py",
+		"/C/Users/Shamil/Documents/GitHub/fffgg/.gitignore",
+		"/C/Users/Shamil/Documents/GitHub/lykos/botconfig.py.example",
+		"/C/Users/Shamil/AppData/Roaming/Sublime Text 2/Packages/User/Python.sublime-settings",
+		"/C/Users/Shamil/Documents/GitHub/adminbot616/bot.py",
+		"/C/Users/Shamil/Documents/GitHub/bunny-cyborg/LICENSE",
+		"/C/Users/Shamil/Documents/GitHub/bunny-cyborg/irc/features.py",
+		"/C/Users/Shamil/Documents/GitHub/bunny-cyborg/bunny.py",
+		"/C/Users/Shamil/Documents/GitHub/lykos/src/settings.py",
+		"/C/Users/Shamil/Documents/GitHub/lykos/src/decorators.py",
+		"/C/Users/Shamil/Documents/GitHub/fffgg/mods/slavetator.sublime-project",
+		"/C/Users/Shamil/Documents/GitHub/fffgg/mods/mailer.py",
+		"/C/Users/Shamil/Documents/GitHub/lykos/oyoyo/parse.py",
+		"/C/Python27/Lib/lib2to3/main.py",
+		"/C/Python27/Lib/lib2to3/__main__.py",
+		"/C/Python27/Lib/lib2to3/__init__.py",
+		"/C/Python27/Lib/__future__.py",
+		"/C/Users/Shamil/Documents/GitHub/lykos/oyoyo/ircevents.py",
+		"/C/Users/Shamil/Documents/GitHub/fffgg/irc/config.py",
+		"/C/Users/Shamil/Documents/GitHub/fffgg/cleverbot.py",
+		"/C/Users/Shamil/Documents/GitHub/fffgg/irc/parse.py",
+		"/C/Users/Shamil/Documents/GitHub/fffgg/irc/numerics.py",
+		"/C/Users/Shamil/Documents/GitHub/Slavetator/config.py.example",
+		"/C/Users/Shamil/Documents/GitHub/bunny-cyborg/irc/client.py"
+	],
+	"find":
+	{
+		"height": 34.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"@hook\\(\"mode",
+			"addrchar",
+			"1",
+			"<a .*>.*</a>",
+			"<link .*>",
+			"STATUS",
+			"STATUSMSG_PREFIXES",
+			"help",
+			"blocking",
+			"STATUSMSG",
+			"STATUSMSG_PREFIXES",
+			"stdout",
+			"pong",
+			"ping",
+			"self.command_handler",
+			"unhandled",
+			"self.command_handler",
+			"cmd_handler",
+			"on_privmsg",
+			"reaper",
+			"threading",
+			"cli",
+			"cmd",
+			"cb",
+			"decor",
+			"deco",
+			"trace",
+			"version_info",
+			"self.command_handler",
+			"@game_mode(\"rndom\"",
+			"fnmatch",
+			"print",
+			"_process_data",
+			"send_stuff",
+			"msgdelay",
+			"_process_queue",
+			"on_whox",
+			"whox",
+			"handlers",
+			"addhandler",
+			"Channel",
+			"channel",
+			"whox",
+			"_on_whox",
+			"accon"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": true,
+		"replace_history":
+		[
+			"",
+			"accon"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "src/commands2.py",
+					"settings":
+					{
+						"buffer_size": 9377,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								9048,
+								9048
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3088.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "/C/Users/Shamil/Documents/GitHub/lykos/src/wolfgame.py",
+					"settings":
+					{
+						"buffer_size": 402532,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								9291,
+								9302
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3931.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "config.py",
+					"settings":
+					{
+						"buffer_size": 1283,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1283,
+								1283
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "irc/parse.py",
+					"settings":
+					{
+						"buffer_size": 4879,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3362,
+								3362
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 882.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "config.json",
+					"settings":
+					{
+						"buffer_size": 809,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								389,
+								389
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JSON.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "src/atexits.py",
+					"settings":
+					{
+						"buffer_size": 1749,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1697,
+								1697
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 84.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "bot.py",
+					"settings":
+					{
+						"buffer_size": 2706,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2695,
+								2695
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 3,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 504.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 34.0
+	},
+	"input":
+	{
+		"height": 31.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 94.0
+	},
+	"replace":
+	{
+		"height": 62.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 174.0,
+	"status_bar_visible": true
+}
